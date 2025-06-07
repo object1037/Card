@@ -2425,6 +2425,16 @@
 	)
 	(wire
 		(pts
+			(xy 40.64 66.04) (xy 50.8 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1476d1dd-2b7a-42dc-935e-4df6a5290dc3")
+	)
+	(wire
+		(pts
 			(xy 157.48 33.02) (xy 163.83 33.02)
 		)
 		(stroke
@@ -2675,6 +2685,16 @@
 	)
 	(wire
 		(pts
+			(xy 40.64 68.58) (xy 50.8 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c7af5759-9646-45a2-87d0-14755d55815f")
+	)
+	(wire
+		(pts
 			(xy 66.04 86.36) (xy 68.58 86.36)
 		)
 		(stroke
@@ -2777,6 +2797,17 @@
 		)
 		(uuid "af4b80e7-9f1c-4186-901d-d71fce881c46")
 	)
+	(label "SDA"
+		(at 40.64 68.58 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "afc1c4cd-5408-448b-8afb-cf8d4df58883")
+	)
 	(label "SCL"
 		(at 172.72 43.18 0)
 		(fields_autoplaced yes)
@@ -2798,6 +2829,17 @@
 			(justify left bottom)
 		)
 		(uuid "c865097c-713b-4acc-8a8f-ab86a993735f")
+	)
+	(label "SCL"
+		(at 40.64 66.04 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "fcdf66fd-8bf6-4dd2-aea6-6e9468d2c8fe")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -2893,7 +2935,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Diode_SMD:D_SMA"
 			(at 254 41.91 0)
 			(effects
 				(font
@@ -2963,7 +3005,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 149.352 36.83 90)
 			(effects
 				(font
@@ -3099,7 +3141,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 162.052 36.83 90)
 			(effects
 				(font
@@ -3587,7 +3629,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 222.25 58.42 0)
 			(effects
 				(font
@@ -3657,7 +3699,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 215.9 58.42 0)
 			(effects
 				(font
@@ -3925,7 +3967,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 155.702 36.83 90)
 			(effects
 				(font
@@ -3995,7 +4037,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 168.402 36.83 90)
 			(effects
 				(font
@@ -4201,7 +4243,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 177.292 36.83 90)
 			(effects
 				(font
