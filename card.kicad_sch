@@ -3530,6 +3530,16 @@
 	)
 	(wire
 		(pts
+			(xy 36.83 99.06) (xy 44.45 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5545aaf6-3f73-4fa2-b8f0-8c91f93033f1")
+	)
+	(wire
+		(pts
 			(xy 170.18 43.18) (xy 180.34 43.18)
 		)
 		(stroke
@@ -3587,6 +3597,16 @@
 			(type default)
 		)
 		(uuid "7199b53c-0a8a-4e52-a292-43718b0eae25")
+	)
+	(wire
+		(pts
+			(xy 36.83 96.52) (xy 44.45 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "73e334f5-595a-4390-b76f-f76c4fc778c9")
 	)
 	(wire
 		(pts
@@ -3933,6 +3953,17 @@
 		)
 		(uuid "34e22996-f2b1-48c8-8ea9-2d95a2481ebb")
 	)
+	(label "SDA"
+		(at 36.83 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "4026e314-696f-43c6-93a2-fa7c569938cb")
+	)
 	(label "P0_15"
 		(at 36.83 53.34 0)
 		(fields_autoplaced yes)
@@ -4009,6 +4040,17 @@
 			(justify left bottom)
 		)
 		(uuid "83425c0f-4e42-4c03-88a7-a9597e129311")
+	)
+	(label "SCL"
+		(at 36.83 104.14 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "8879de6d-ffa9-40ec-85e0-92d5a19aff2e")
 	)
 	(label "SWDCLK"
 		(at 36.83 83.82 0)
@@ -4600,6 +4642,83 @@
 			(project ""
 				(path "/702c4184-d498-4362-ae32-d42c7ce9136a"
 					(reference "R2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x04")
+		(at 31.75 99.06 0)
+		(mirror y)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "364956db-4540-415a-ac22-c5e7c005556a")
+		(property "Reference" "J3"
+			(at 29.21 99.0599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Conn_01x04"
+			(at 29.21 101.5999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal"
+			(at 31.75 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 31.75 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 31.75 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6f53e934-6d91-40cc-b6b7-5607b3e8207c")
+		)
+		(pin "3"
+			(uuid "8e8e9f08-1306-4d69-8fdf-7a17b27de677")
+		)
+		(pin "2"
+			(uuid "f441d96d-69bd-4c88-8671-203e7986e5e7")
+		)
+		(pin "4"
+			(uuid "d2d4c48a-e19c-4274-a447-37ecd30d6577")
+		)
+		(instances
+			(project ""
+				(path "/702c4184-d498-4362-ae32-d42c7ce9136a"
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -6001,6 +6120,73 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 44.45 96.52 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "cde1d832-8930-4527-a0c5-bdd0caac432c")
+		(property "Reference" "#PWR011"
+			(at 50.8 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 48.26 96.5199 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 44.45 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 44.45 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 44.45 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8c97549f-5584-4447-a81b-83a81caaa665")
+		)
+		(instances
+			(project ""
+				(path "/702c4184-d498-4362-ae32-d42c7ce9136a"
+					(reference "#PWR011")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+BATT")
 		(at 44.45 91.44 270)
 		(unit 1)
@@ -6128,6 +6314,73 @@
 			(project ""
 				(path "/702c4184-d498-4362-ae32-d42c7ce9136a"
 					(reference "#FLG02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+BATT")
+		(at 44.45 99.06 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ec37b0f5-523e-4b1b-8222-47e319993a89")
+		(property "Reference" "#PWR012"
+			(at 40.64 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+BATT"
+			(at 48.26 99.0599 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 44.45 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 44.45 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+BATT\""
+			(at 44.45 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "de47ebeb-6e56-4dbc-8a1c-bc60f1c30f40")
+		)
+		(instances
+			(project ""
+				(path "/702c4184-d498-4362-ae32-d42c7ce9136a"
+					(reference "#PWR012")
 					(unit 1)
 				)
 			)
