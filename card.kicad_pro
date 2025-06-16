@@ -512,9 +512,9 @@
       "plot": "gerber/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "card.step",
       "svg": "",
-      "vrml": ""
+      "vrml": "card.wrl"
     },
     "page_layout_descr_file": ""
   },
