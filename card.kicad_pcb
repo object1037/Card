@@ -245,6 +245,18 @@
 				)
 			)
 		)
+		(property "LCSC" "C23162"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "fb6398f8-cf9b-42e2-83c9-c4db668b8bb9")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/15539bf9-3f9c-4b46-8057-a8778d3a99bb")
 		(sheetname "ルート")
@@ -1118,6 +1130,18 @@
 				)
 			)
 		)
+		(property "LCSC" "C23162"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "c5e0bc79-9d6f-45cb-a6e7-fcc8c0824040")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/c0440dba-4260-48db-bfcc-f9f3372eff71")
 		(sheetname "ルート")
@@ -1335,7 +1359,7 @@
 		(path "/ee975890-d9d9-4179-9edc-21b2d5a15652")
 		(sheetname "ルート")
 		(sheetfile "card.kicad_sch")
-		(attr smd)
+		(attr smd exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start -4 11)
 			(end 4 11)
@@ -1938,6 +1962,18 @@
 				)
 			)
 		)
+		(property "LCSC" "C15525"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "3cc2be02-0dc7-42b6-bffb-21e7c464b642")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "C_*")
 		(path "/72e03536-c09a-4076-a197-e054876844af")
 		(sheetname "ルート")
@@ -2145,6 +2181,18 @@
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "5bc280ba-039c-4639-831b-d324b2530071")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C641630"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "bf0ddbdb-e262-4632-bf59-b3454c1778fd")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2661,6 +2709,18 @@
 				)
 			)
 		)
+		(property "LCSC" "C4184"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "e37316cb-bd85-4fda-8f64-0be1411535c0")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/f96f8b9a-d3b7-453d-8544-29e138d69dfa")
 		(sheetname "ルート")
@@ -2868,6 +2928,18 @@
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "d98fe1fd-2277-4bda-bc60-41d3b6a8f9cc")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C4177"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "a64cfd8a-b0b9-42e4-a819-49f6874e0b10")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3089,6 +3161,18 @@
 				)
 			)
 		)
+		(property "LCSC" "C1525"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "fe5562a9-ecc7-463c-bbb7-2f96b6c5c69a")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "C_*")
 		(path "/7aed95fe-a7ae-4093-8352-a06806b1ebbf")
 		(sheetname "ルート")
@@ -3296,6 +3380,18 @@
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "7d1a7c6c-8d93-4ccd-9d88-81d46f7546ce")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C2480"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "9e8e481d-5346-475e-802b-7f84bd9abce1")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3589,6 +3685,18 @@
 				)
 			)
 		)
+		(property "LCSC" "C2286"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "ea654cb1-7556-4c1f-a122-61de2a0696b4")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/6d288c39-c33d-4187-9514-e8cfdc0863bb")
 		(sheetname "ルート")
@@ -3821,6 +3929,18 @@
 			(effects
 				(font
 					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C5657569"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "f68cf534-f634-4d84-b88e-04c7fc0af92c")
+			(effects
+				(font
+					(size 1.27 1.27)
 					(thickness 0.15)
 				)
 			)
@@ -4452,7 +4572,7 @@
 		(zone
 			(net 0)
 			(net_name "")
-			(layers "*.Cu")
+			(layers "F&B.Cu")
 			(uuid "5826416a-dca0-4a21-b3a4-6e40583a57b3")
 			(name "Antenna Keep Out")
 			(hatch edge 0.5)
@@ -4551,6 +4671,18 @@
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "bc0d8b44-fbf6-4c0e-bd01-ea9908c5cd6c")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C4190"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "f9b89508-c77f-4be8-bdaf-5522fb8e8085")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5101,6 +5233,18 @@
 				)
 			)
 		)
+		(property "LCSC" "C4177"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "fd52061b-334a-4beb-9feb-dd63d1aa6bb8")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/c37963f2-4551-4814-896e-1ed5bd6d083d")
 		(sheetname "ルート")
@@ -5308,6 +5452,18 @@
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "03e46714-7c70-42de-9c40-13c7236ac2d7")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C15008"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "70930437-7e5d-4895-97e1-34d93dd073e8")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6275,7 +6431,7 @@
 		(path "/364956db-4540-415a-ac22-c5e7c005556a")
 		(sheetname "ルート")
 		(sheetfile "card.kicad_sch")
-		(attr smd)
+		(attr smd exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start -2.06 2.775)
 			(end -2.06 1.785)
@@ -6591,7 +6747,7 @@
 		(path "/1a9beeef-3ab2-4c13-a1c0-3060ada2ba91")
 		(sheetname "ルート")
 		(sheetfile "card.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start -1.33 1.33)
 			(end -1.33 0)
@@ -6887,7 +7043,7 @@
 		(path "/78413b62-8d1c-4e20-8ba8-bbc34c0ca14f")
 		(sheetname "ルート")
 		(sheetfile "card.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start 1.33 -1.27)
 			(end -1.33 -1.27)
