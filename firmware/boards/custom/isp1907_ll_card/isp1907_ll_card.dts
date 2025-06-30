@@ -20,8 +20,17 @@
 		};
 	};
 
+	interrupts {
+		compatible = "gpio-keys";
+		int0: int_0 {
+			gpios = <&gpio0 18 GPIO_ACTIVE_LOW>;
+			label = "MTCH6102 INT pin";
+		};
+	};
+
 	aliases {
 		led0 = &led0;
+		int0 = &int0;
 		trackpad0 = &mtch6102;
 	};
 };
@@ -45,6 +54,7 @@
 &i2c0 {
 	compatible = "nordic,nrf-twim";
 	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
 	pinctrl-0 = <&i2c0_default>;
 	pinctrl-1 = <&i2c0_sleep>;
 	pinctrl-names = "default", "sleep";
