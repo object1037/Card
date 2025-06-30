@@ -1,6 +1,9 @@
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
 
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(app, LOG_LEVEL_DBG);
+
 #define SLEEP_TIME_MS 1000
 #define LED0_NODE DT_ALIAS(led0)
 
@@ -20,6 +23,7 @@ int main(void) {
 
   while (1) {
     ret = gpio_pin_toggle_dt(&led);
+    LOG_INF("LED toggled");
     if (ret < 0) {
       return 0;
     }
