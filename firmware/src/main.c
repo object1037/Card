@@ -4,7 +4,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app, LOG_LEVEL_DBG);
 
-#define SLEEP_TIME_MS 1000
+#define SLEEP_TIME_MS 500
 
 #define I2C0_NODE DT_ALIAS(trackpad0)
 
@@ -41,51 +41,50 @@ int main(void) {
     if (touch_state & 0x04) {
       LOG_WRN("Lrg detected");
     }
-    if (touch_state & 0x01) {
-      LOG_INF("Gesture detected");
+    if (touch_state & 0x02) {
       ret = i2c_write_read_dt(&trackpad, &addr[3], 1, &gesture_state, 1);
       if (ret < 0) {
         return 0;
       }
       switch (gesture_state) {
         case 0x00:
-          LOG_INF("G: None");
+          LOG_INF("Gesture: None");
           break;
         case 0x10:
-          LOG_INF("G: Click");
+          LOG_INF("Gesture: Click");
           break;
         case 0x11:
-          LOG_INF("G: Click and hold");
+          LOG_INF("Gesture: Click and hold");
           break;
         case 0x20:
-          LOG_INF("G: Double click");
+          LOG_INF("Gesture: Double click");
           break;
         case 0x31:
-          LOG_INF("G: Swipe down");
+          LOG_INF("Gesture: Swipe down");
           break;
         case 0x32:
-          LOG_INF("G: Swipe down hold");
+          LOG_INF("Gesture: Swipe down hold");
           break;
         case 0x41:
-          LOG_INF("G: Swipe right");
+          LOG_INF("Gesture: Swipe right");
           break;
         case 0x42:
-          LOG_INF("G: Swipe right hold");
+          LOG_INF("Gesture: Swipe right hold");
           break;
         case 0x51:
-          LOG_INF("G: Swipe up");
+          LOG_INF("Gesture: Swipe up");
           break;
         case 0x52:
-          LOG_INF("G: Swipe up hold");
+          LOG_INF("Gesture: Swipe up hold");
           break;
         case 0x61:
-          LOG_INF("G: Swipe left");
+          LOG_INF("Gesture: Swipe left");
           break;
         case 0x62:
-          LOG_INF("G: Swipe left hold");
+          LOG_INF("Gesture: Swipe left hold");
           break;
         default:
-          LOG_INF("G: Unknown gesture: 0x%02X", gesture_state);
+          LOG_INF("Gesture: Unknown gesture: 0x%02X", gesture_state);
           break;
       }
     }
