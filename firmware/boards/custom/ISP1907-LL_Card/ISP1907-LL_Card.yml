@@ -1,0 +1,10 @@
+identifier: ISP1907-LL_Card/nrf52811
+name: ISP1907-LL based business card
+vendor: custom
+type: mcu
+arch: arm
+ram: 24
+flash: 192
+toolchain:
+  - zephyr
+supported: []
