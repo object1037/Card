@@ -7,23 +7,26 @@ LOG_MODULE_REGISTER(app, LOG_LEVEL_DBG);
 
 #define SLEEP_TIME_MS 1000
 
-#define INT0_NODE DT_ALIAS(int0)
+// #define INT0_NODE DT_ALIAS(int0)
 #define I2C0_NODE DT_ALIAS(trackpad0)
 
 #define TOUCH_STATE_ADDR 0x10
 
-static const struct gpio_dt_spec int0 = GPIO_DT_SPEC_GET(INT0_NODE, gpios);
+// static const struct gpio_dt_spec int0 = GPIO_DT_SPEC_GET(INT0_NODE, gpios);
 static const struct i2c_dt_spec trackpad = I2C_DT_SPEC_GET(I2C0_NODE);
 
+/*
 void int0_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins) {
   LOG_INF("Interrupt triggered on pin %d", int0.pin);
 }
+*/
 
 static struct gpio_callback int0_cb_data;
 
 int main(void) {
   int ret;
 
+  /*
   ret = gpio_pin_interrupt_configure_dt(&int0, GPIO_INT_EDGE_TO_ACTIVE);
   if (ret < 0) {
     LOG_ERR("Failed to configure interrupt");
@@ -32,6 +35,7 @@ int main(void) {
 
   gpio_init_callback(&int0_cb_data, int0_callback, BIT(int0.pin));
   gpio_add_callback(int0.port, &int0_cb_data);
+  */
 
   if (!device_is_ready(trackpad.bus)) {
     LOG_ERR("Trackpad not ready");
