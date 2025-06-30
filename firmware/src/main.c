@@ -2,6 +2,9 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/i2c.h>
 
+#include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/gap.h>
+
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app, LOG_LEVEL_DBG);
 
@@ -11,6 +14,23 @@ LOG_MODULE_REGISTER(app, LOG_LEVEL_DBG);
 #define I2C0_NODE DT_ALIAS(trackpad0)
 
 #define TOUCH_STATE_ADDR 0x10
+
+#define DEVICE_NAME CONFIG_BT_DEVICE_NAME
+#define DEVICE_NAME_LEN (sizeof(DEVICE_NAME) - 1)
+
+static const struct bt_data ad[] = {
+  BT_DATA_BYTES(BT_DATA_FLAGS, BT_LE_AD_NO_BREDR),
+  BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
+};
+
+static unsigned char url_data[] = {
+  0x17, '/', '/', 'o', 'b', 'j', 'e', 'c', 't', '1', '0',
+  '3', '7', '.', 'd', 'e', 'v'
+};
+
+static const struct bt_data sd[] = {
+  BT_DATA(BT_DATA_URI, url_data, sizeof(url_data)),
+};
 
 // static const struct gpio_dt_spec int0 = GPIO_DT_SPEC_GET(INT0_NODE, gpios);
 static const struct i2c_dt_spec trackpad = I2C_DT_SPEC_GET(I2C0_NODE);
@@ -36,6 +56,16 @@ int main(void) {
   gpio_init_callback(&int0_cb_data, int0_callback, BIT(int0.pin));
   gpio_add_callback(int0.port, &int0_cb_data);
   */
+  ret = bt_enable(NULL);
+  if (ret < 0) {
+    LOG_ERR("Bluetooth init failed (err %d)\n", ret);
+    return -1;
+  }
+  ret = bt_le_adv_start(BT_LE_ADV_NCONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
+  if (ret < 0) {
+    LOG_ERR("Advertising failed to start (err %d)\n", ret);
+    return -1;
+  }
 
   if (!device_is_ready(trackpad.bus)) {
     LOG_ERR("Trackpad not ready");
