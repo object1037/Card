@@ -39,7 +39,7 @@ static const struct bt_data sd[] = {
 
 static void adv_work_handler(struct k_work *work) {
   int ret = bt_le_adv_start(BT_LE_ADV_CONN_FAST_2, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
-  if (ret < 0) return 0;
+  if (ret < 0) return;
 }
 
 static void advertising_start(void) {
