@@ -1,4 +1,4 @@
-identifier: ISP1907-LL_Card/nrf52811
+identifier: isp1907_ll_card/nrf52811
 name: ISP1907-LL based business card
 vendor: custom
 type: mcu

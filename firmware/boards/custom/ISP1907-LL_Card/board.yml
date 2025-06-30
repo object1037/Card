@@ -1,5 +1,0 @@
-board:
-  name: ISP1907-LL_Card
-  vendor: custom
-  socs:
-    - name: nrf52811
