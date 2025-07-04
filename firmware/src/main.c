@@ -71,8 +71,17 @@ static void hid_init(void) {
 
       0xA1, 0x01, /* Collection (Application) */
 
-      0x09, 0x01, /* Usage (Pointer) */
-      0xA1, 0x00, /* Collection (Physical) */
+      0x09, 0x01,       /* Usage (Pointer) */
+      0xA1, 0x00,       /* Collection (Physical) */
+      0x05, 0x01,       /* Usage Page (Generic Desktop) */
+      0x09, 0x30,       /* Usage (X) */
+      0x09, 0x31,       /* Usage (Y) */
+      0x16, 0x01, 0xFE, /* Logical minimum (-511) */
+      0x26, 0xFF, 0x01, /* Logical maximum (511) */
+      0x75, 0x0A,       /* Report Size (10) */
+      0x95, 0x02,       /* Report Count (2) */
+      0x81, 0x06,       /* Input (Data, Variable, Relative) */
+
       0x05, 0x09, /* Usage Page (Buttons) */
       0x19, 0x01, /* Usage Minimum (01) */
       0x29, 0x03, /* Usage Maximum (03) */
@@ -81,18 +90,9 @@ static void hid_init(void) {
       0x75, 0x01, /* Report Size (1) */
       0x95, 0x03, /* Report Count (3) */
       0x81, 0x02, /* Input (Data, Variable, Absolute) */
-      0x75, 0x05, /* Report Size (5) */
+      0x75, 0x01, /* Report Size (1) */
       0x95, 0x01, /* Report Count (1) */
       0x81, 0x01, /* Input (Constant) for padding */
-
-      0x05, 0x01, /* Usage Page (Generic Desktop) */
-      0x09, 0x30, /* Usage (X) */
-      0x09, 0x31, /* Usage (Y) */
-      0x15, 0x81, /* Logical minimum (-2047) */
-      0x25, 0x7F, /* Logical maximum (2047) */
-      0x75, 0x08, /* Report Size (8) */
-      0x95, 0x02, /* Report Count (2) */
-      0x81, 0x06, /* Input (Data, Variable, Relative) */
       0xC0,       /* End Collection (Physical) */
       0xC0,       /* End Collection (Application) */
   };
@@ -118,22 +118,22 @@ static void hid_init(void) {
 static void pointer_movement_send(int16_t x_delta, int16_t y_delta) {
   if (!connection) return;
 
-  x_delta = MAX(MIN(x_delta, SCHAR_MAX), SCHAR_MIN);
-  y_delta = MAX(MIN(y_delta, SCHAR_MAX), SCHAR_MIN);
+  x_delta = MAX(MIN(x_delta, 511), -511);
+  y_delta = MAX(MIN(y_delta, 511), -511);
 
   if (in_boot_mode) {
     bt_hids_boot_mouse_inp_rep_send(&hids_obj, connection, NULL, (int8_t)x_delta, (int8_t)y_delta, NULL);
   } else {
     uint8_t buffer[3];
 
-    buffer[0] = 0;  // Buttons, no buttons pressed
-    buffer[1] = (uint8_t)x_delta;
-    buffer[2] = (uint8_t)y_delta;
+    uint16_t ux = (uint16_t)(x_delta & 0x03FF);
+    uint16_t uy = (uint16_t)(y_delta & 0x03FF);
 
-    int ret = bt_hids_inp_rep_send(&hids_obj, connection, 0, buffer, sizeof(buffer), NULL);
-    if (ret < 0) {
-      gpio_pin_toggle_dt(&led);
-    }
+    buffer[0] = (uint8_t)(ux & 0xFF);
+    buffer[1] = (uint8_t)(((ux >> 8) & 0x03) | ((uy & 0x3F) << 2));
+    buffer[2] = (uint8_t)(((uy >> 6) & 0x0F));
+
+    bt_hids_inp_rep_send(&hids_obj, connection, 0, buffer, sizeof(buffer), NULL);
   }
 }
 
@@ -199,7 +199,7 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
 
 static void trackpad_get() {
   int ret;
-  uint16_t touch_x, touch_y;
+  int16_t touch_x, touch_y;
   gesture_t gesture;
 
   bool was_touched = is_touched;
@@ -207,15 +207,15 @@ static void trackpad_get() {
   ret = get_touch_data(&trackpad, &touch_x, &touch_y, &is_touched, &gesture);
   if (ret < 0) return;
 
-  uint16_t x_new = touch_y;
-  uint16_t y_new = TOUCH_X_MAX - touch_x;
+  int16_t x_new = touch_y;
+  int16_t y_new = TOUCH_X_MAX - touch_x;
 
   if (!was_touched && is_touched) {
     position.x_val = x_new;
     position.y_val = y_new;
   } else if (was_touched && is_touched) {
-    uint16_t x_delta = x_new - position.x_val;
-    uint16_t y_delta = y_new - position.y_val;
+    int16_t x_delta = x_new - position.x_val;
+    int16_t y_delta = y_new - position.y_val;
 
     if (x_delta || y_delta) {
       position.x_val = x_new;
