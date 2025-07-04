@@ -16,10 +16,11 @@
 
 #define DEVICE_NAME_LEN (sizeof(CONFIG_BT_DEVICE_NAME) - 1)
 
-struct pointer_pos {
+struct pos_gesture {
   int16_t x_val;
   int16_t y_val;
-} position;
+  gesture_t gesture;
+} posi_gest;
 bool is_touched = false;
 
 struct bt_conn *connection;
@@ -27,7 +28,7 @@ bool in_boot_mode;
 
 BT_HIDS_DEF(hids_obj, 3);
 
-K_MSGQ_DEFINE(hids_queue, sizeof(struct pointer_pos), 10, 4);
+K_MSGQ_DEFINE(hids_queue, sizeof(struct pos_gesture), 5, 1);
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 static const struct i2c_dt_spec trackpad = I2C_DT_SPEC_GET(I2C0_NODE);
@@ -115,14 +116,19 @@ static void hid_init(void) {
   ret = bt_hids_init(&hids_obj, &hids_init_param);
 }
 
-static void pointer_movement_send(int16_t x_delta, int16_t y_delta) {
+static void pointer_movement_send(int16_t x_delta, int16_t y_delta, gesture_t gesture) {
   if (!connection) return;
 
   x_delta = MAX(MIN(x_delta, 511), -511);
   y_delta = MAX(MIN(y_delta, 511), -511);
 
+  uint8_t buttons = 0;
+  if (gesture == GESTURE_CLICK) {
+    buttons |= 0x01;
+  }
+
   if (in_boot_mode) {
-    bt_hids_boot_mouse_inp_rep_send(&hids_obj, connection, NULL, (int8_t)x_delta, (int8_t)y_delta, NULL);
+    bt_hids_boot_mouse_inp_rep_send(&hids_obj, connection, &buttons, (int8_t)x_delta, (int8_t)y_delta, NULL);
   } else {
     uint8_t buffer[3];
 
@@ -131,17 +137,17 @@ static void pointer_movement_send(int16_t x_delta, int16_t y_delta) {
 
     buffer[0] = (uint8_t)(ux & 0xFF);
     buffer[1] = (uint8_t)(((ux >> 8) & 0x03) | ((uy & 0x3F) << 2));
-    buffer[2] = (uint8_t)(((uy >> 6) & 0x0F));
+    buffer[2] = (uint8_t)(((uy >> 6) & 0x0F) | (buttons << 4));
 
     bt_hids_inp_rep_send(&hids_obj, connection, 0, buffer, sizeof(buffer), NULL);
   }
 }
 
 static void mouse_handler(struct k_work *work) {
-  struct pointer_pos pos;
+  struct pos_gesture pos_ges;
 
-  while (!k_msgq_get(&hids_queue, &pos, K_NO_WAIT)) {
-    pointer_movement_send(pos.x_val, pos.y_val);
+  while (!k_msgq_get(&hids_queue, &pos_ges, K_NO_WAIT)) {
+    pointer_movement_send(pos_ges.x_val, pos_ges.y_val, pos_ges.gesture);
   }
 }
 
@@ -199,36 +205,41 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
 
 static void trackpad_get() {
   int ret;
-  int16_t touch_x, touch_y;
-  gesture_t gesture;
+  int16_t x_new, y_new;
+  struct pos_gesture delta_ges = {0};
 
   bool was_touched = is_touched;
 
-  ret = get_touch_data(&trackpad, &touch_x, &touch_y, &is_touched, &gesture);
+  // flip x/y here
+  ret = get_touch_data(&trackpad, &y_new, &x_new, &is_touched, &delta_ges.gesture);
   if (ret < 0) return;
 
-  int16_t x_new = touch_y;
-  int16_t y_new = TOUCH_X_MAX - touch_x;
+  y_new = TOUCH_X_MAX - y_new;
 
   if (!was_touched && is_touched) {
-    position.x_val = x_new;
-    position.y_val = y_new;
+    posi_gest.x_val = x_new;
+    posi_gest.y_val = y_new;
   } else if (was_touched && is_touched) {
-    int16_t x_delta = x_new - position.x_val;
-    int16_t y_delta = y_new - position.y_val;
+    delta_ges.x_val = x_new - posi_gest.x_val;
+    delta_ges.y_val = y_new - posi_gest.y_val;
 
-    if (x_delta || y_delta) {
-      position.x_val = x_new;
-      position.y_val = y_new;
-
-      struct pointer_pos delta = {x_delta, y_delta};
-      ret = k_msgq_put(&hids_queue, &delta, K_NO_WAIT);
-      if (ret) return;
-
-      if (k_msgq_num_used_get(&hids_queue) == 1) {
-        k_work_submit(&hids_work);
-      }
+    if (delta_ges.x_val || delta_ges.y_val) {
+      posi_gest.x_val = x_new;
+      posi_gest.y_val = y_new;
     }
+  }
+
+  if (delta_ges.x_val == 0 && delta_ges.y_val == 0 && delta_ges.gesture == posi_gest.gesture) {
+    return;
+  }
+
+  posi_gest.gesture = delta_ges.gesture;
+
+  ret = k_msgq_put(&hids_queue, &delta_ges, K_NO_WAIT);
+  if (ret) return;
+
+  if (k_msgq_num_used_get(&hids_queue) == 1) {
+    k_work_submit(&hids_work);
   }
 }
 
