@@ -14,18 +14,15 @@
 
 #define TOUCH_STATE_ADDR 0x10
 
-#define DEVICE_NAME CONFIG_BT_DEVICE_NAME
-#define DEVICE_NAME_LEN (sizeof(DEVICE_NAME) - 1)
+#define DEVICE_NAME_LEN (sizeof(CONFIG_BT_DEVICE_NAME) - 1)
 
 struct pointer_pos {
   int16_t x_val;
   int16_t y_val;
 } position = {-1, -1};
 
-static struct conn_mode {
-  struct bt_conn *conn;
-  bool in_boot_mode;
-} conn_mode[CONFIG_BT_HIDS_MAX_CLIENT_COUNT];
+struct bt_conn *connection;
+bool in_boot_mode;
 
 BT_HIDS_DEF(hids_obj, 3);
 
@@ -44,29 +41,17 @@ static const struct bt_data ad[] = {
 };
 
 static const struct bt_data sd[] = {
-    BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
+    BT_DATA(BT_DATA_NAME_COMPLETE, CONFIG_BT_DEVICE_NAME, DEVICE_NAME_LEN),
 };
 
 static void hids_pm_evt_handler(enum bt_hids_pm_evt evt, struct bt_conn *conn) {
-  size_t i;
-
-  for (i = 0; i < CONFIG_BT_HIDS_MAX_CLIENT_COUNT; i++) {
-    if (conn_mode[i].conn == conn) {
-      break;
-    }
-  }
-
-  if (i >= CONFIG_BT_HIDS_MAX_CLIENT_COUNT) {
-    return;
-  }
-
   switch (evt) {
     case BT_HIDS_PM_EVT_BOOT_MODE_ENTERED:
-      conn_mode[i].in_boot_mode = true;
+      in_boot_mode = true;
       break;
 
     case BT_HIDS_PM_EVT_REPORT_MODE_ENTERED:
-      conn_mode[i].in_boot_mode = false;
+      in_boot_mode = false;
       break;
 
     default:
@@ -78,7 +63,6 @@ static void hid_init(void) {
   int ret;
   struct bt_hids_init_param hids_init_param = {0};
   struct bt_hids_inp_rep *hids_inp_rep;
-  static const uint8_t mouse_movement_mask[DIV_ROUND_UP(3, 8)] = {0};
 
   static const uint8_t report_map[] = {
       0x05, 0x01, /* Usage Page (Generic Desktop) */
@@ -86,7 +70,6 @@ static void hid_init(void) {
 
       0xA1, 0x01, /* Collection (Application) */
 
-      0x85, 0x01, /* Report ID (1) */
       0x09, 0x01, /* Usage (Pointer) */
       0xA1, 0x00, /* Collection (Physical) */
       0x05, 0x09, /* Usage Page (Buttons) */
@@ -122,8 +105,7 @@ static void hid_init(void) {
 
   hids_inp_rep = &hids_init_param.inp_rep_group_init.reports[0];
   hids_inp_rep->size = 3;
-  hids_inp_rep->id = 1;
-  hids_inp_rep->rep_mask = mouse_movement_mask;
+  hids_inp_rep->id = 0;
   hids_init_param.inp_rep_group_init.cnt++;
 
   hids_init_param.is_mouse = true;
@@ -133,27 +115,23 @@ static void hid_init(void) {
 }
 
 static void pointer_movement_send(int16_t x_delta, int16_t y_delta) {
-  for (size_t i = 0; i < CONFIG_BT_HIDS_MAX_CLIENT_COUNT; i++) {
-    if (!conn_mode[i].conn) {
-      continue;
-    }
+  if (!connection) return;
 
-    x_delta = MAX(MIN(x_delta, SCHAR_MAX), SCHAR_MIN);
-    y_delta = MAX(MIN(y_delta, SCHAR_MAX), SCHAR_MIN);
+  x_delta = MAX(MIN(x_delta, SCHAR_MAX), SCHAR_MIN);
+  y_delta = MAX(MIN(y_delta, SCHAR_MAX), SCHAR_MIN);
 
-    if (conn_mode[i].in_boot_mode) {
-      bt_hids_boot_mouse_inp_rep_send(&hids_obj, conn_mode[i].conn, NULL, (int8_t)x_delta, (int8_t)y_delta, NULL);
-    } else {
-      uint8_t buffer[3];
+  if (in_boot_mode) {
+    bt_hids_boot_mouse_inp_rep_send(&hids_obj, connection, NULL, (int8_t)x_delta, (int8_t)y_delta, NULL);
+  } else {
+    uint8_t buffer[3];
 
-      buffer[0] = 0;  // Buttons, no buttons pressed
-      buffer[1] = (uint8_t)x_delta;
-      buffer[2] = (uint8_t)y_delta;
+    buffer[0] = 0;  // Buttons, no buttons pressed
+    buffer[1] = (uint8_t)x_delta;
+    buffer[2] = (uint8_t)y_delta;
 
-      int ret = bt_hids_inp_rep_send(&hids_obj, conn_mode[i].conn, 0, buffer, sizeof(buffer), NULL);
-      if (ret < 0) {
-        gpio_pin_toggle_dt(&led);
-      }
+    int ret = bt_hids_inp_rep_send(&hids_obj, connection, 0, buffer, sizeof(buffer), NULL);
+    if (ret < 0) {
+      gpio_pin_toggle_dt(&led);
     }
   }
 }
@@ -163,16 +141,6 @@ static void mouse_handler(struct k_work *work) {
 
   while (!k_msgq_get(&hids_queue, &pos, K_NO_WAIT)) {
     pointer_movement_send(pos.x_val, pos.y_val);
-  }
-}
-
-static void insert_conn_object(struct bt_conn *conn) {
-  for (size_t i = 0; i < CONFIG_BT_HIDS_MAX_CLIENT_COUNT; i++) {
-    if (!conn_mode[i].conn) {
-      conn_mode[i].conn = conn;
-      conn_mode[i].in_boot_mode = false;
-      return;
-    }
   }
 }
 
@@ -195,22 +163,17 @@ static void on_connected(struct bt_conn *conn, uint8_t err) {
   err = bt_hids_connected(&hids_obj, conn);
   if (err) return;
 
-  insert_conn_object(conn);
+  connection = conn;
+  in_boot_mode = false;
 
   gpio_pin_set_dt(&led, 1);
 }
 
 static void on_disconnected(struct bt_conn *conn, uint8_t reason) {
-  int err = bt_hids_disconnected(&hids_obj, conn);
+  bt_hids_disconnected(&hids_obj, conn);
 
-  for (size_t i = 0; i < CONFIG_BT_HIDS_MAX_CLIENT_COUNT; i++) {
-    if (conn_mode[i].conn == conn) {
-      conn_mode[i].conn = NULL;
-      break;
-    }
-  }
+  connection = NULL;
 
-  gpio_pin_set_dt(&led, 0);
   advertising_start();
 }
 
@@ -218,26 +181,18 @@ void on_recycled(void) {
   advertising_start();
 }
 
-static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_security_err err) {
-  for (size_t i = 0; i < level; i++) {
-    gpio_pin_set_dt(&led, 0);
-    k_msleep(200);
-    gpio_pin_set_dt(&led, 1);
-    k_msleep(200);
-  }
-}
-
 static void pairing_complete(struct bt_conn *conn, bool bonded) {
-  return;
+  gpio_pin_set_dt(&led, 0);
 }
 
 static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
-  for (size_t i = 0; i < 5; i++) {
+  for (size_t i = 0; i < 3; i++) {
     gpio_pin_set_dt(&led, 0);
-    k_msleep(100);
+    k_msleep(200);
     gpio_pin_set_dt(&led, 1);
-    k_msleep(50);
+    k_msleep(200);
   }
+  gpio_pin_set_dt(&led, 0);
   return;
 }
 
@@ -248,8 +203,8 @@ static void trackpad_get() {
   ret = i2c_burst_read_dt(&trackpad, TOUCH_STATE_ADDR, touch_data, sizeof(touch_data));
   if (ret < 0) return;
 
-  int x_new = (touch_data[1] << 4) | (touch_data[3] >> 4);
-  int y_new = (touch_data[2] << 4) | (touch_data[3] & 0x0F);
+  uint16_t x_new = (touch_data[2] << 4) | (touch_data[3] & 0x0F);
+  uint16_t y_new = 576 - ((touch_data[1] << 4) | (touch_data[3] >> 4));
 
   if (position.x_val == -1) {
     position.x_val = x_new;
@@ -277,7 +232,6 @@ struct bt_conn_cb connection_callbacks = {
     .connected = on_connected,
     .disconnected = on_disconnected,
     .recycled = on_recycled,
-    .security_changed = security_changed,
 };
 
 static struct bt_conn_auth_info_cb conn_auth_info_callbacks = {
