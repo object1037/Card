@@ -7,12 +7,12 @@
 #include <zephyr/bluetooth/conn.h>
 #include <bluetooth/services/hids.h>
 
+#include "mtch6102.h"
+
 #define SLEEP_TIME_MS 20
 
 #define INT0_NODE DT_ALIAS(int0)
 #define I2C0_NODE DT_ALIAS(trackpad0)
-
-#define TOUCH_STATE_ADDR 0x10
 
 #define DEVICE_NAME_LEN (sizeof(CONFIG_BT_DEVICE_NAME) - 1)
 
@@ -198,13 +198,15 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
 
 static void trackpad_get() {
   int ret;
-  uint8_t touch_data[5] = {0};
+  uint16_t touch_x, touch_y;
+  bool is_touched;
+  gesture_t gesture;
 
-  ret = i2c_burst_read_dt(&trackpad, TOUCH_STATE_ADDR, touch_data, sizeof(touch_data));
+  ret = get_touch_data(&trackpad, &touch_x, &touch_y, &is_touched, &gesture);
   if (ret < 0) return;
 
-  uint16_t x_new = (touch_data[2] << 4) | (touch_data[3] & 0x0F);
-  uint16_t y_new = 576 - ((touch_data[1] << 4) | (touch_data[3] >> 4));
+  uint16_t x_new = touch_y;
+  uint16_t y_new = TOUCH_X_MAX - touch_x;
 
   if (position.x_val == -1) {
     position.x_val = x_new;
