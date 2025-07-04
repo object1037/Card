@@ -241,18 +241,6 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
   return;
 }
 
-static void auth_passkey_display(struct bt_conn *conn, unsigned int passkey) {
-  return;
-}
-
-static void auth_passkey_confirm(struct bt_conn *conn, unsigned int passkey) {
-  bt_conn_auth_passkey_confirm(conn);
-}
-
-static void auth_cancel(struct bt_conn *conn) {
-  return;
-}
-
 static void trackpad_get() {
   int ret;
   uint8_t touch_data[5] = {0};
@@ -292,12 +280,6 @@ struct bt_conn_cb connection_callbacks = {
     .security_changed = security_changed,
 };
 
-static struct bt_conn_auth_cb conn_auth_callbacks = {
-    .passkey_confirm = auth_passkey_confirm,
-    .passkey_display = auth_passkey_display,
-    .cancel = auth_cancel,
-};
-
 static struct bt_conn_auth_info_cb conn_auth_info_callbacks = {
     .pairing_complete = pairing_complete,
     .pairing_failed = pairing_failed,
@@ -313,7 +295,7 @@ int main(void) {
 
   ret = bt_conn_cb_register(&connection_callbacks);
   if (ret < 0) return 0;
-  ret = bt_conn_auth_cb_register(&conn_auth_callbacks);
+  ret = bt_conn_auth_cb_register(NULL);
   if (ret < 0) return 0;
   ret = bt_conn_auth_info_cb_register(&conn_auth_info_callbacks);
   if (ret < 0) return 0;
