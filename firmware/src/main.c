@@ -19,7 +19,8 @@
 struct pointer_pos {
   int16_t x_val;
   int16_t y_val;
-} position = {-1, -1};
+} position;
+bool is_touched = false;
 
 struct bt_conn *connection;
 bool in_boot_mode;
@@ -199,8 +200,9 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
 static void trackpad_get() {
   int ret;
   uint16_t touch_x, touch_y;
-  bool is_touched;
   gesture_t gesture;
+
+  bool was_touched = is_touched;
 
   ret = get_touch_data(&trackpad, &touch_x, &touch_y, &is_touched, &gesture);
   if (ret < 0) return;
@@ -208,12 +210,12 @@ static void trackpad_get() {
   uint16_t x_new = touch_y;
   uint16_t y_new = TOUCH_X_MAX - touch_x;
 
-  if (position.x_val == -1) {
+  if (!was_touched && is_touched) {
     position.x_val = x_new;
     position.y_val = y_new;
-  } else {
-    int x_delta = x_new - position.x_val;
-    int y_delta = y_new - position.y_val;
+  } else if (was_touched && is_touched) {
+    uint16_t x_delta = x_new - position.x_val;
+    uint16_t y_delta = y_new - position.y_val;
 
     if (x_delta || y_delta) {
       position.x_val = x_new;
