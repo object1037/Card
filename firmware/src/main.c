@@ -75,7 +75,43 @@ static void adv_work_handler(struct k_work *work) {
 }
 
 static void trackpad_work_handler(struct k_work *work) {
-  gpio_pin_toggle_dt(&led);
+  int ret;
+  int16_t x_new, y_new;
+  struct pos_gesture delta_ges = {0};
+
+  bool was_touched = is_touched;
+
+  // flip x/y here
+  ret = get_touch_data(&trackpad, &y_new, &x_new, &is_touched, &delta_ges.gesture);
+  if (ret < 0) return;
+
+  y_new = TOUCH_X_MAX - y_new;
+
+  if (!was_touched && is_touched) {
+    posi_gest.x_val = x_new;
+    posi_gest.y_val = y_new;
+  } else if (was_touched && is_touched) {
+    delta_ges.x_val = x_new - posi_gest.x_val;
+    delta_ges.y_val = y_new - posi_gest.y_val;
+
+    if (delta_ges.x_val || delta_ges.y_val) {
+      posi_gest.x_val = x_new;
+      posi_gest.y_val = y_new;
+    }
+  }
+
+  if (delta_ges.x_val == 0 && delta_ges.y_val == 0 && delta_ges.gesture == posi_gest.gesture) {
+    return;
+  }
+
+  posi_gest.gesture = delta_ges.gesture;
+
+  ret = k_msgq_put(&hids_queue, &delta_ges, K_NO_WAIT);
+  if (ret) return;
+
+  if (k_msgq_num_used_get(&hids_queue) == 1) {
+    k_work_submit(&hids_work);
+  }
 }
 
 static void hids_pm_evt_handler(enum bt_hids_pm_evt evt, struct bt_conn *conn) {
@@ -223,46 +259,6 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
   return;
 }
 
-static void trackpad_get() {
-  int ret;
-  int16_t x_new, y_new;
-  struct pos_gesture delta_ges = {0};
-
-  bool was_touched = is_touched;
-
-  // flip x/y here
-  ret = get_touch_data(&trackpad, &y_new, &x_new, &is_touched, &delta_ges.gesture);
-  if (ret < 0) return;
-
-  y_new = TOUCH_X_MAX - y_new;
-
-  if (!was_touched && is_touched) {
-    posi_gest.x_val = x_new;
-    posi_gest.y_val = y_new;
-  } else if (was_touched && is_touched) {
-    delta_ges.x_val = x_new - posi_gest.x_val;
-    delta_ges.y_val = y_new - posi_gest.y_val;
-
-    if (delta_ges.x_val || delta_ges.y_val) {
-      posi_gest.x_val = x_new;
-      posi_gest.y_val = y_new;
-    }
-  }
-
-  if (delta_ges.x_val == 0 && delta_ges.y_val == 0 && delta_ges.gesture == posi_gest.gesture) {
-    return;
-  }
-
-  posi_gest.gesture = delta_ges.gesture;
-
-  ret = k_msgq_put(&hids_queue, &delta_ges, K_NO_WAIT);
-  if (ret) return;
-
-  if (k_msgq_num_used_get(&hids_queue) == 1) {
-    k_work_submit(&hids_work);
-  }
-}
-
 static void int_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins) {
   k_work_submit(&trackpad_work);
 }
@@ -315,8 +311,6 @@ int main(void) {
   if (ret < 0) return 0;
 
   while (1) {
-    // trackpad_get();
-
     k_msleep(SLEEP_TIME_MS);
   }
   return 0;
