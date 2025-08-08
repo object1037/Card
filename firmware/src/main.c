@@ -18,6 +18,11 @@
 
 #define DEVICE_NAME_LEN (sizeof(CONFIG_BT_DEVICE_NAME) - 1)
 
+static void mouse_handler(struct k_work *work);
+static void adv_work_handler(struct k_work *work);
+static void trackpad_work_handler(struct k_work *work);
+static void pointer_movement_send(int16_t x_delta, int16_t y_delta, gesture_t gesture);
+
 static struct pos_gesture {
   int16_t x_val;
   int16_t y_val;
@@ -33,13 +38,15 @@ BT_HIDS_DEF(hids_obj, 3);
 
 K_MSGQ_DEFINE(hids_queue, sizeof(struct pos_gesture), 5, 1);
 
+static K_WORK_DEFINE(hids_work, mouse_handler);
+static K_WORK_DEFINE(adv_work, adv_work_handler);
+static K_WORK_DEFINE(trackpad_work, trackpad_work_handler);
+
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const struct gpio_dt_spec int_pin = GPIO_DT_SPEC_GET(INT0_NODE, gpios);
 static const struct i2c_dt_spec trackpad = I2C_DT_SPEC_GET(I2C0_NODE);
 
 static struct gpio_callback int_cb_data;
-
-static struct k_work adv_work, hids_work;
 
 static const struct bt_data ad[] = {
     BT_DATA_BYTES(BT_DATA_GAP_APPEARANCE, (BT_APPEARANCE_HID_TOUCHPAD >> 0) & 0xFF, (BT_APPEARANCE_HID_TOUCHPAD >> 8) & 0xFF),
@@ -50,6 +57,26 @@ static const struct bt_data ad[] = {
 static const struct bt_data sd[] = {
     BT_DATA(BT_DATA_NAME_COMPLETE, CONFIG_BT_DEVICE_NAME, DEVICE_NAME_LEN),
 };
+
+static void mouse_handler(struct k_work *work) {
+  struct pos_gesture pos_ges;
+
+  while (!k_msgq_get(&hids_queue, &pos_ges, K_NO_WAIT)) {
+    pointer_movement_send(pos_ges.x_val, pos_ges.y_val, pos_ges.gesture);
+  }
+}
+
+static void adv_work_handler(struct k_work *work) {
+  if (is_adv_running) return;
+
+  int ret = bt_le_adv_start(BT_LE_ADV_CONN_FAST_2, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
+  if (ret) return;
+  is_adv_running = true;
+}
+
+static void trackpad_work_handler(struct k_work *work) {
+  gpio_pin_toggle_dt(&led);
+}
 
 static void hids_pm_evt_handler(enum bt_hids_pm_evt evt, struct bt_conn *conn) {
   switch (evt) {
@@ -148,22 +175,6 @@ static void pointer_movement_send(int16_t x_delta, int16_t y_delta, gesture_t ge
   }
 }
 
-static void mouse_handler(struct k_work *work) {
-  struct pos_gesture pos_ges;
-
-  while (!k_msgq_get(&hids_queue, &pos_ges, K_NO_WAIT)) {
-    pointer_movement_send(pos_ges.x_val, pos_ges.y_val, pos_ges.gesture);
-  }
-}
-
-static void adv_work_handler(struct k_work *work) {
-  if (is_adv_running) return;
-
-  int ret = bt_le_adv_start(BT_LE_ADV_CONN_FAST_2, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
-  if (ret) return;
-  is_adv_running = true;
-}
-
 static void advertising_start(void) {
   k_work_submit(&adv_work);
 }
@@ -212,10 +223,6 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
   return;
 }
 
-static void int_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins) {
-  gpio_pin_toggle_dt(&led);
-}
-
 static void trackpad_get() {
   int ret;
   int16_t x_new, y_new;
@@ -256,6 +263,10 @@ static void trackpad_get() {
   }
 }
 
+static void int_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins) {
+  k_work_submit(&trackpad_work);
+}
+
 static struct bt_conn_cb connection_callbacks = {
     .connected = on_connected,
     .disconnected = on_disconnected,
@@ -294,9 +305,6 @@ int main(void) {
 
   ret = bt_enable(NULL);
   if (ret < 0) return 0;
-
-  k_work_init(&hids_work, mouse_handler);
-  k_work_init(&adv_work, adv_work_handler);
 
   settings_load();
   advertising_start();
