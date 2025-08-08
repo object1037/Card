@@ -1,6 +1,12 @@
 #include "mtch6102.h"
 
-int get_touch_data(const struct i2c_dt_spec *trackpad, uint16_t *touch_x, uint16_t *touch_y, bool *is_touched, gesture_t *gesture) {
+int get_touch_data(
+  const struct i2c_dt_spec *trackpad,
+  uint16_t *touch_x,
+  uint16_t *touch_y,
+  bool *is_touched,
+  gesture_t *gesture
+) {
   int ret;
   uint8_t touch_data[5] = {0};
 

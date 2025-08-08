@@ -1,6 +1,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/i2c.h>
+#include <zephyr/settings/settings.h>
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/gap.h>
@@ -174,6 +175,8 @@ static void on_connected(struct bt_conn *conn, uint8_t err) {
   in_boot_mode = false;
 
   gpio_pin_set_dt(&led, 1);
+  k_msleep(500);
+  gpio_pin_set_dt(&led, 0);
 }
 
 static void on_disconnected(struct bt_conn *conn, uint8_t reason) {
@@ -189,6 +192,8 @@ void on_recycled(void) {
 }
 
 static void pairing_complete(struct bt_conn *conn, bool bonded) {
+  gpio_pin_set_dt(&led, 1);
+  k_msleep(250);
   gpio_pin_set_dt(&led, 0);
 }
 
@@ -277,6 +282,7 @@ int main(void) {
   k_work_init(&hids_work, mouse_handler);
   k_work_init(&adv_work, adv_work_handler);
 
+  settings_load();
   advertising_start();
 
   if (!device_is_ready(trackpad.bus)) return 0;
