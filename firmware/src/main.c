@@ -10,32 +10,36 @@
 
 #include "mtch6102.h"
 
-#define SLEEP_TIME_MS 20
+#define SLEEP_TIME_MS 1000
 
+#define LED0_NODE DT_ALIAS(led0)
 #define INT0_NODE DT_ALIAS(int0)
 #define I2C0_NODE DT_ALIAS(trackpad0)
 
 #define DEVICE_NAME_LEN (sizeof(CONFIG_BT_DEVICE_NAME) - 1)
 
-struct pos_gesture {
+static struct pos_gesture {
   int16_t x_val;
   int16_t y_val;
   gesture_t gesture;
 } posi_gest;
-bool is_touched = false;
+static bool is_touched = false;
 
-struct bt_conn *connection;
-bool in_boot_mode;
+static struct bt_conn *connection;
+static bool in_boot_mode;
+static volatile bool is_adv_running = false;
 
 BT_HIDS_DEF(hids_obj, 3);
 
 K_MSGQ_DEFINE(hids_queue, sizeof(struct pos_gesture), 5, 1);
 
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+static const struct gpio_dt_spec int_pin = GPIO_DT_SPEC_GET(INT0_NODE, gpios);
 static const struct i2c_dt_spec trackpad = I2C_DT_SPEC_GET(I2C0_NODE);
 
+static struct gpio_callback int_cb_data;
+
 static struct k_work adv_work, hids_work;
-volatile bool is_adv_running = false;
 
 static const struct bt_data ad[] = {
     BT_DATA_BYTES(BT_DATA_GAP_APPEARANCE, (BT_APPEARANCE_HID_TOUCHPAD >> 0) & 0xFF, (BT_APPEARANCE_HID_TOUCHPAD >> 8) & 0xFF),
@@ -208,6 +212,10 @@ static void pairing_failed(struct bt_conn *conn, enum bt_security_err reason) {
   return;
 }
 
+static void int_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins) {
+  gpio_pin_toggle_dt(&led);
+}
+
 static void trackpad_get() {
   int ret;
   int16_t x_new, y_new;
@@ -248,7 +256,7 @@ static void trackpad_get() {
   }
 }
 
-struct bt_conn_cb connection_callbacks = {
+static struct bt_conn_cb connection_callbacks = {
     .connected = on_connected,
     .disconnected = on_disconnected,
     .recycled = on_recycled,
@@ -263,9 +271,14 @@ int main(void) {
   int ret;
 
   if (!gpio_is_ready_dt(&led)) return 0;
-  ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+  ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_INACTIVE);
   if (ret < 0) return 0;
-  gpio_pin_set_dt(&led, 0);
+
+  if (!gpio_is_ready_dt(&int_pin)) return 0;
+  ret = gpio_pin_configure_dt(&int_pin, GPIO_INPUT);
+  if (ret < 0) return 0;
+  ret = gpio_pin_interrupt_configure_dt(&int_pin, GPIO_INT_EDGE_FALLING);
+  if (ret < 0) return 0;
 
   ret = bt_conn_cb_register(&connection_callbacks);
   if (ret < 0) return 0;
@@ -273,6 +286,9 @@ int main(void) {
   if (ret < 0) return 0;
   ret = bt_conn_auth_info_cb_register(&conn_auth_info_callbacks);
   if (ret < 0) return 0;
+
+  gpio_init_callback(&int_cb_data, int_callback, BIT(int_pin.pin));
+  gpio_add_callback(int_pin.port, &int_cb_data);
 
   hid_init();
 
@@ -287,8 +303,11 @@ int main(void) {
 
   if (!device_is_ready(trackpad.bus)) return 0;
 
+  ret = init_mtch6102(&trackpad);
+  if (ret < 0) return 0;
+
   while (1) {
-    trackpad_get();
+    // trackpad_get();
 
     k_msleep(SLEEP_TIME_MS);
   }

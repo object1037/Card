@@ -22,6 +22,7 @@
 
 	interrupts {
 		compatible = "gpio-keys";
+		debounce-interval-ms = <0>;
 		int0: int_0 {
 			gpios = <&gpio0 18 GPIO_ACTIVE_LOW>;
 			label = "MTCH6102 INT pin";
@@ -63,7 +64,6 @@
 		compatible = "i2c-device";
 		reg = <0x25>;
 		label = "MTCH6102";
-		// int-gpios = <&gpio0 18 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 	};
 };
 
