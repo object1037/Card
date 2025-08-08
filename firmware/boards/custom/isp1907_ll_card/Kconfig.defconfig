@@ -1,0 +1,9 @@
+if BOARD_ISP1907_LL_CARD
+
+config HW_STACK_PROTECTION
+  default ARCH_HAS_STACK_PROTECTION
+
+config ARM_MPU
+  default y
+
+endif # BOARD_ISP1907_LL_CARD
