@@ -50,6 +50,7 @@
 
 &gpio0 {
 	status = "okay";
+	sense-edge-mask = <0xffffffff>;
 };
 
 &i2c0 {

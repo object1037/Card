@@ -8,9 +8,10 @@
 #include <zephyr/bluetooth/conn.h>
 #include <bluetooth/services/hids.h>
 
-#include "mtch6102.h"
+#include <zephyr/pm/device.h>
+#include <zephyr/sys/poweroff.h>
 
-#define SLEEP_TIME_MS 1000
+#include "mtch6102.h"
 
 #define LED0_NODE DT_ALIAS(led0)
 #define INT0_NODE DT_ALIAS(int0)
@@ -28,6 +29,8 @@ static struct pos_gesture {
   int16_t y_val;
   gesture_t gesture;
 } posi_gest;
+static struct pos_gesture delta_ges_reset = {0};
+static struct pos_gesture delta_ges_click = {0, 0, 1};
 static bool is_touched = false;
 
 static struct bt_conn *connection;
@@ -191,8 +194,23 @@ static void pointer_movement_send(int16_t x_delta, int16_t y_delta, gesture_t ge
   y_delta = MAX(MIN(y_delta, 511), -511);
 
   uint8_t buttons = 0;
-  if (gesture == GESTURE_CLICK) {
-    buttons |= 0x01;
+
+  switch (gesture) {
+    case GESTURE_CLICK:
+      buttons |= 0x01;
+      k_msgq_put(&hids_queue, &delta_ges_reset, K_NO_WAIT);
+      break;
+    case GESTURE_CLICK_HOLD:
+      buttons |= 0x01;
+      break;
+    case GESTURE_DOUBLE_CLICK:
+      buttons |= 0x01;
+      k_msgq_put(&hids_queue, &delta_ges_reset, K_NO_WAIT);
+      k_msgq_put(&hids_queue, &delta_ges_click, K_NO_WAIT);
+      k_msgq_put(&hids_queue, &delta_ges_reset, K_NO_WAIT);
+      break;
+    default:
+      break;
   }
 
   if (in_boot_mode) {
@@ -310,8 +328,5 @@ int main(void) {
   ret = init_mtch6102(&trackpad);
   if (ret < 0) return 0;
 
-  while (1) {
-    k_msleep(SLEEP_TIME_MS);
-  }
   return 0;
 }
