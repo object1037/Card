@@ -15,10 +15,16 @@ int init_mtch6102(const struct i2c_dt_spec *trackpad) {
 
   uint8_t idle_period_h = 0x0c;
   uint8_t idle_period_l = 0x99;  // 100 ms
+  uint8_t tap_hold_time_h = 0x27;
+  uint8_t tap_hold_time_l = 0x10;// 2 s
 
   ret = i2c_reg_write_byte_dt(trackpad, IDLE_PERIOD_L_ADDR, idle_period_l);
   if (ret < 0) return -1;
   ret = i2c_reg_write_byte_dt(trackpad, IDLE_PERIOD_H_ADDR, idle_period_h);
+  if (ret < 0) return -1;
+  ret = i2c_reg_write_byte_dt(trackpad, TAP_HOLD_TIME_L_ADDR, tap_hold_time_l);
+  if (ret < 0) return -1;
+  ret = i2c_reg_write_byte_dt(trackpad, TAP_HOLD_TIME_H_ADDR, tap_hold_time_h);
   if (ret < 0) return -1;
 
   ret = apply_config(trackpad);

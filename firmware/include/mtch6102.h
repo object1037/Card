@@ -18,6 +18,9 @@
 #define IDLE_PERIOD_L_ADDR 0x27
 #define IDLE_PERIOD_H_ADDR 0x28
 
+#define TAP_HOLD_TIME_L_ADDR 0x3C
+#define TAP_HOLD_TIME_H_ADDR 0x3D
+
 #define CMD_CFG 0x20
 
 #define STATE_TOUCH_BM 0x01

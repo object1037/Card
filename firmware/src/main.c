@@ -201,7 +201,7 @@ static void pointer_movement_send(int16_t x_delta, int16_t y_delta, gesture_t ge
       k_msgq_put(&hids_queue, &delta_ges_reset, K_NO_WAIT);
       break;
     case GESTURE_CLICK_HOLD:
-      buttons |= 0x01;
+      buttons |= 0x02;
       break;
     case GESTURE_DOUBLE_CLICK:
       buttons |= 0x01;
